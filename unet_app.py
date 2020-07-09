@@ -43,11 +43,17 @@ batch_size = 64
 steps = 3000
 
 
+X_train_file = os.path.join(config.train_imgs_dump_path,'/X_train.p')
+X_train = pickle.load(open(pfile,'rb'))
 
-X_train = pickle.load(open('../pickle_jar/X_train_r2_4000_V.p','rb'))
+Y_train_file = os.path.join(config.train_gt_dump_path,'/Y_train.p')
 Y_train = pickle.load(open('../pickle_jar/Y_train_r2_4000_V.p','rb'))
-X_val = pickle.load(open('../pickle_jar/X_val_r2_500_III.p','rb'))
-Y_val = pickle.load(open('../pickle_jar/Y_val_r2_500_III.p','rb'))
+
+X_val_file = os.path.join(config.test_imgs_dump_path,'/X_test.p')
+X_val = pickle.load(open(X_val_file,'rb'))
+
+Y_val_file = os.path.join(config.test_gt_dump_path,'/Y_test.p')
+Y_val = pickle.load(open(Y_val_file,'rb'))
 
 # verify shape of sets
 print(X_train.shape)
@@ -69,49 +75,52 @@ model.save('../pickle_jar/unet_XXIX_{:.3f}_{:.3f}'.format(fit.history['val_loss'
                                                         fit.history['val_jacc_coef'][-1]))
 
 
-# save prediction history for a few images
-img_28_preds = [predictions.predhis[i][28,:,:,0] for i in range(NUM_EPOCHS)]
-img_74_preds = [predictions.predhis[i][74,:,:,0] for i in range(NUM_EPOCHS)]
-
-img_28_set = [X_val[28], Y_val[28], img_28_preds]
-img_74_set = [X_val[74], Y_val[74], img_74_preds]
-
-pickle.dump(img_28_set, open('../pickle_jar/img_28_set_X.p','wb'))
-pickle.dump(img_74_set, open('../pickle_jar/img_74_set_X.p','wb'))
-
-
-history_plot(fit)
-
-for i in range(Y_val.shape[0]):
-    
-    x = X_val[i]
-    y = Y_val[i]
-
-    # Pick out which target to look at
-    CLASS_NO = 0
-    targ = y[:, :, CLASS_NO]
-
-    # Run the model on that sample
-    pred = model.predict(X_val)[i, :, :, CLASS_NO]
-
-    # Plot it
-    fig, (ax1, ax2, ax3) = plt.subplots(1,3, figsize=(16,8))
-    ax1.imshow(scale_bands(x[:,:,[4,2,1]])) # This index starts at 0, so I had to decrement
-    ax2.imshow(targ, vmin=0, vmax=1)
-    ax3.imshow(pred, vmin=0, vmax=1)
-
-    ax1.set_title('Image')
-    ax2.set_title('Ground Truth');
-    ax3.set_title('Prediction');
-    ax1.grid()
-    ax2.grid()
-    ax3.grid()
-    plt.show()
-    print('{}/{}'.format(i + 1, Y_val.shape[0]))
-    
-    break
-    
-    time.sleep(1)
-    display.clear_output(wait=True)
-
-print('DONE')
+# pred_img = ''
+# pred = model.predict
+# # # save prediction history for a few images
+# # img_28_preds = [predictions.predhis[i][28,:,:,0] for i in range(NUM_EPOCHS)]
+# # img_74_preds = [predictions.predhis[i][74,:,:,0] for i in range(NUM_EPOCHS)]
+# # 
+# # img_28_set = [X_val[28], Y_val[28], img_28_preds]
+# # img_74_set = [X_val[74], Y_val[74], img_74_preds]
+# # 
+# # pickle.dump(img_28_set, open('../pickle_jar/img_28_set_X.p','wb'))
+# # pickle.dump(img_74_set, open('../pickle_jar/img_74_set_X.p','wb'))
+# # 
+# # 
+# # history_plot(fit)
+# 
+# for i in range(Y_val.shape[0]):
+#     
+#     x = X_val[i]
+#     y = Y_val[i]
+# 
+#     # Pick out which target to look at
+#     CLASS_NO = 0
+#     targ = y[:, :, CLASS_NO]
+# 
+#     # Run the model on that sample
+#     pred = model.predict(X_val)[i, :, :, CLASS_NO]
+#     
+# 
+#     # Plot it
+#     fig, (ax1, ax2, ax3) = plt.subplots(1,3, figsize=(16,8))
+# #     ax1.imshow(scale_bands(x[:,:,[4,2,1]])) # This index starts at 0, so I had to decrement
+#     ax2.imshow(targ, vmin=0, vmax=1)
+#     ax3.imshow(pred, vmin=0, vmax=1)
+# 
+#     ax1.set_title('Image')
+#     ax2.set_title('Ground Truth');
+#     ax3.set_title('Prediction');
+#     ax1.grid()
+#     ax2.grid()
+#     ax3.grid()
+#     plt.show()
+#     print('{}/{}'.format(i + 1, Y_val.shape[0]))
+#     
+#     break
+#     
+#     time.sleep(1)
+#     display.clear_output(wait=True)
+# 
+# print('DONE')
