@@ -133,134 +133,134 @@ def generator(x_train, y_train, batch_size):
         yield x_batch, y_batch
         
         
-X_train = pickle.load(open('../pickle_jar/X_train_r2_4000_V.p','rb'))
-Y_train = pickle.load(open('../pickle_jar/Y_train_r2_4000_V.p','rb'))
-X_val = pickle.load(open('../pickle_jar/X_val_r2_500_III.p','rb'))
-Y_val = pickle.load(open('../pickle_jar/Y_val_r2_500_III.p','rb'))
-
-# verify shape of sets
-print(X_train.shape)
-print(Y_train.shape)
-print(X_val.shape)
-print(Y_val.shape)
-
-# View some images to verify training set
-# plt.rc("image", cmap="binary") # use black/white palette for plotting
-start = 0
-fig, ax = plt.subplots(2,5, figsize=(16,8))
-for i in range(0, 5):
-#     plt.subplot(2,5,i+1-start)
-    x = X_train[start + i]
-    y = Y_train[start + i]
-    ax[0,i].imshow(scale_bands(x[:,:,[4,2,1]]))
-    ax[1,i].imshow(y[:, :, 0], cmap=plt.cm.gray, vmin=0, vmax=1)
-#     plt.xticks(())
-#     plt.yticks(())
-    ax[0,i].grid()
-    ax[1,i].grid()
-# plt.tight_layout()
-# print (Y_train[start:start+5])
-
-# set network size params
-N_CLASSES = 1 # water
-N_CHANNEL = 8
-
-# define metrics
-smooth = 1.
-
-NUM_EPOCHS = 75
-INPUT_SIZE = 240
-
-# Define callback to save model checkpoints
-if not os.path.exists('checkpoints'):
-    os.makedirs('checkpoints')
-model_checkpoint = ModelCheckpoint(os.path.join('checkpoints', 'weights.{epoch:02d}-{val_loss:.5f}.hdf5'), 
-                                   monitor='loss', 
-                                   save_best_only=True)
-
-# Define callback to reduce learning rate when learning stagnates
-# This won't actually kick in with only 5 training epochs, but I'm assuming you'll train for hundreds of epochs when you get serious about training this NN.
-reduce_lr = ReduceLROnPlateau(monitor='val_loss',
-                              factor=0.5, 
-                              patience=3, 
-                              epsilon=0.002, 
-                              cooldown=1)
-
-# # Define rate scheduler callack (this is an alternative to ReduceLROnPlateau. There is no reason to use both.)
-# schedule = lambda epoch_i: 0.01*np.power(0.97, i)
-# schedule_lr = LearningRateScheduler(schedule)
-
-# TensorBoard visualizations... this stuff is so freaking cool
-tensorboard = TensorBoard(log_dir='/tmp/tboard_logs2', 
-                          histogram_freq=0, 
-                          write_graph=True, 
-                          write_images=True)
-
-predictions=prediction_history()
-
-lr = 1e-4
-batch_size = 64
-steps = 3000
-
-# Train the model
-model = get_unet(lr)
-
-fit = model.fit_generator(generator(x_train=X_train, y_train=Y_train, batch_size=batch_size), 
-                    steps_per_epoch=steps, 
-                    epochs=NUM_EPOCHS, 
-                    callbacks=[model_checkpoint, reduce_lr, tensorboard, predictions],
-                    validation_data=(X_val, Y_val))
-
-# pickle model
-model.save('../pickle_jar/unet_XXIX_{:.3f}_{:.3f}'.format(fit.history['val_loss'][-1],
-                                                        fit.history['val_jacc_coef'][-1]))
-
-
-# save prediction history for a few images
-img_28_preds = [predictions.predhis[i][28,:,:,0] for i in range(NUM_EPOCHS)]
-img_74_preds = [predictions.predhis[i][74,:,:,0] for i in range(NUM_EPOCHS)]
-
-img_28_set = [X_val[28], Y_val[28], img_28_preds]
-img_74_set = [X_val[74], Y_val[74], img_74_preds]
-
-pickle.dump(img_28_set, open('../pickle_jar/img_28_set_X.p','wb'))
-pickle.dump(img_74_set, open('../pickle_jar/img_74_set_X.p','wb'))
-
-
-history_plot(fit)
-
-for i in range(Y_val.shape[0]):
-    
-    x = X_val[i]
-    y = Y_val[i]
-
-    # Pick out which target to look at
-    CLASS_NO = 0
-    targ = y[:, :, CLASS_NO]
-
-    # Run the model on that sample
-    pred = model.predict(X_val)[i, :, :, CLASS_NO]
-
-    # Plot it
-    fig, (ax1, ax2, ax3) = plt.subplots(1,3, figsize=(16,8))
-    ax1.imshow(scale_bands(x[:,:,[4,2,1]])) # This index starts at 0, so I had to decrement
-    ax2.imshow(targ, vmin=0, vmax=1)
-    ax3.imshow(pred, vmin=0, vmax=1)
-
-    ax1.set_title('Image')
-    ax2.set_title('Ground Truth');
-    ax3.set_title('Prediction');
-    ax1.grid()
-    ax2.grid()
-    ax3.grid()
-    plt.show()
-    print('{}/{}'.format(i + 1, Y_val.shape[0]))
-    
-    break
-    
-    time.sleep(1)
-#     display.clear_output(wait=True)
-
-print('DONE')
+# X_train = pickle.load(open('../pickle_jar/X_train_r2_4000_V.p','rb'))
+# Y_train = pickle.load(open('../pickle_jar/Y_train_r2_4000_V.p','rb'))
+# X_val = pickle.load(open('../pickle_jar/X_val_r2_500_III.p','rb'))
+# Y_val = pickle.load(open('../pickle_jar/Y_val_r2_500_III.p','rb'))
+# 
+# # verify shape of sets
+# print(X_train.shape)
+# print(Y_train.shape)
+# print(X_val.shape)
+# print(Y_val.shape)
+# 
+# # View some images to verify training set
+# # plt.rc("image", cmap="binary") # use black/white palette for plotting
+# start = 0
+# fig, ax = plt.subplots(2,5, figsize=(16,8))
+# for i in range(0, 5):
+# #     plt.subplot(2,5,i+1-start)
+#     x = X_train[start + i]
+#     y = Y_train[start + i]
+#     ax[0,i].imshow(scale_bands(x[:,:,[4,2,1]]))
+#     ax[1,i].imshow(y[:, :, 0], cmap=plt.cm.gray, vmin=0, vmax=1)
+# #     plt.xticks(())
+# #     plt.yticks(())
+#     ax[0,i].grid()
+#     ax[1,i].grid()
+# # plt.tight_layout()
+# # print (Y_train[start:start+5])
+# 
+# # set network size params
+# N_CLASSES = 1 # water
+# N_CHANNEL = 8
+# 
+# # define metrics
+# smooth = 1.
+# 
+# NUM_EPOCHS = 75
+# INPUT_SIZE = 240
+# 
+# # Define callback to save model checkpoints
+# if not os.path.exists('checkpoints'):
+#     os.makedirs('checkpoints')
+# model_checkpoint = ModelCheckpoint(os.path.join('checkpoints', 'weights.{epoch:02d}-{val_loss:.5f}.hdf5'), 
+#                                    monitor='loss', 
+#                                    save_best_only=True)
+# 
+# # Define callback to reduce learning rate when learning stagnates
+# # This won't actually kick in with only 5 training epochs, but I'm assuming you'll train for hundreds of epochs when you get serious about training this NN.
+# reduce_lr = ReduceLROnPlateau(monitor='val_loss',
+#                               factor=0.5, 
+#                               patience=3, 
+#                               epsilon=0.002, 
+#                               cooldown=1)
+# 
+# # # Define rate scheduler callack (this is an alternative to ReduceLROnPlateau. There is no reason to use both.)
+# # schedule = lambda epoch_i: 0.01*np.power(0.97, i)
+# # schedule_lr = LearningRateScheduler(schedule)
+# 
+# # TensorBoard visualizations... this stuff is so freaking cool
+# tensorboard = TensorBoard(log_dir='/tmp/tboard_logs2', 
+#                           histogram_freq=0, 
+#                           write_graph=True, 
+#                           write_images=True)
+# 
+# predictions=prediction_history()
+# 
+# lr = 1e-4
+# batch_size = 64
+# steps = 3000
+# 
+# # Train the model
+# model = get_unet(lr)
+# 
+# fit = model.fit_generator(generator(x_train=X_train, y_train=Y_train, batch_size=batch_size), 
+#                     steps_per_epoch=steps, 
+#                     epochs=NUM_EPOCHS, 
+#                     callbacks=[model_checkpoint, reduce_lr, tensorboard, predictions],
+#                     validation_data=(X_val, Y_val))
+# 
+# # pickle model
+# model.save('../pickle_jar/unet_XXIX_{:.3f}_{:.3f}'.format(fit.history['val_loss'][-1],
+#                                                         fit.history['val_jacc_coef'][-1]))
+# 
+# 
+# # save prediction history for a few images
+# img_28_preds = [predictions.predhis[i][28,:,:,0] for i in range(NUM_EPOCHS)]
+# img_74_preds = [predictions.predhis[i][74,:,:,0] for i in range(NUM_EPOCHS)]
+# 
+# img_28_set = [X_val[28], Y_val[28], img_28_preds]
+# img_74_set = [X_val[74], Y_val[74], img_74_preds]
+# 
+# pickle.dump(img_28_set, open('../pickle_jar/img_28_set_X.p','wb'))
+# pickle.dump(img_74_set, open('../pickle_jar/img_74_set_X.p','wb'))
+# 
+# 
+# history_plot(fit)
+# 
+# for i in range(Y_val.shape[0]):
+#     
+#     x = X_val[i]
+#     y = Y_val[i]
+# 
+#     # Pick out which target to look at
+#     CLASS_NO = 0
+#     targ = y[:, :, CLASS_NO]
+# 
+#     # Run the model on that sample
+#     pred = model.predict(X_val)[i, :, :, CLASS_NO]
+# 
+#     # Plot it
+#     fig, (ax1, ax2, ax3) = plt.subplots(1,3, figsize=(16,8))
+#     ax1.imshow(scale_bands(x[:,:,[4,2,1]])) # This index starts at 0, so I had to decrement
+#     ax2.imshow(targ, vmin=0, vmax=1)
+#     ax3.imshow(pred, vmin=0, vmax=1)
+# 
+#     ax1.set_title('Image')
+#     ax2.set_title('Ground Truth');
+#     ax3.set_title('Prediction');
+#     ax1.grid()
+#     ax2.grid()
+#     ax3.grid()
+#     plt.show()
+#     print('{}/{}'.format(i + 1, Y_val.shape[0]))
+#     
+#     break
+#     
+#     time.sleep(1)
+# #     display.clear_output(wait=True)
+# 
+# print('DONE')
 
 
