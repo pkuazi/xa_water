@@ -1,6 +1,8 @@
 import os
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 from cjfranzini_unet_model import get_unet,prediction_history, history_plot
+import pickle
+
 # set network size params
 N_CLASSES = 6 # farm, forest, grass, buildings, water,other
 N_CHANNEL = 3
