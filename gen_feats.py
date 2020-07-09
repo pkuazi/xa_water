@@ -3,7 +3,6 @@ import numpy as np
 import os
 import rasterio
 import pickle
-from config import config
 
 def read_img_data_dict(imgs_dir):
     imgs_names = os.listdir(imgs_dir)
@@ -27,7 +26,7 @@ def read_img_data_dict(imgs_dir):
 if __name__ == '__main__':    
     BASE_DIR = '/mnt/rsimages/lulc/AISample'
     X_train_file = os.path.join(BASE_DIR,'cache/train-set/X_train.p')
-    print X_train_file
+    print(X_train_file)
     X_train = read_img_data_dict(config.train_imgs_path)
     pickle.dump(X_train, open(X_train_file,'wb'))
     
