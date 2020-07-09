@@ -46,7 +46,7 @@ def jacc_coef_int(y_true, y_pred):
     return K.mean(jac)
 
 
-def get_unet(lr=0.001):
+def get_unet(lr=0.001, INPUT_SIZE, INPUT_SIZE, N_CHANNEL):
     inputs = Input((INPUT_SIZE, INPUT_SIZE, N_CHANNEL))
     conv1 = Conv2D(32, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(inputs)
     conv1 = Conv2D(32, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv1)
