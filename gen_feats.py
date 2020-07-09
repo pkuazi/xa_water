@@ -27,18 +27,18 @@ if __name__ == '__main__':
     BASE_DIR = '/mnt/rsimages/lulc/AISample'
     X_train_file = os.path.join(BASE_DIR,'cache/train-set/X_train.p')
     print(X_train_file)
-    X_train = read_img_data_dict(config.train_imgs_path)
+    X_train = read_img_data_dict(os.path.join(BASE_DIR,"train_set/imgs"))
     pickle.dump(X_train, open(X_train_file,'wb'))
     
-    Y_train = read_img_data_dict(config.train_gt_path)
+    Y_train = read_img_data_dict(os.path.join(BASE_DIR,'train_set/gt'))
     Y_train_file = os.path.join(BASE_DIR,'cache/train-set/Y_train.p')
     pickle.dump(Y_train, open(Y_train_file,'wb'))
     
-    X_test = read_img_data_dict(config.test_imgs_path)
+    X_test = read_img_data_dict(os.path.join(BASE_DIR,"test_set/imgs"))
     X_test_file = os.path.join(BASE_DIR,'cache/test-set/X_test.p')
     pickle.dump(X_test, open(X_test_file,'wb'))
     
-    Y_test = read_img_data_dict(config.test_gt_path)
+    Y_test = read_img_data_dict(os.path.join(BASE_DIR,'test_set/gt'))
     Y_test_file = os.path.join(BASE_DIR,'cache/test-set/Y_test.p')
     pickle.dump(Y_test, open(Y_test_file,'wb'))
     
