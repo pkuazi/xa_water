@@ -42,18 +42,18 @@ lr = 1e-4
 batch_size = 64
 steps = 3000
 
+BASE_DIR = '/mnt/rsimages/lulc/AISample'
+X_train_file = os.path.join(BASE_DIR,'cache/train-set/X_train.p')
+X_train = pickle.load(open(X_train_file,'rb'))
 
-X_train_file = os.path.join(config.train_imgs_dump_path,'/X_train.p')
-X_train = pickle.load(open(pfile,'rb'))
+Y_train_file = os.path.join(BASE_DIR,'cache/train-set/Y_train.p')
+Y_train = pickle.load(open(Y_train_file,'rb'))
 
-Y_train_file = os.path.join(config.train_gt_dump_path,'/Y_train.p')
-Y_train = pickle.load(open('../pickle_jar/Y_train_r2_4000_V.p','rb'))
+X_test_file = os.path.join(BASE_DIR,'cache/test-set/X_test.p')
+X_val = pickle.load(open(X_test_file,'rb'))
 
-X_val_file = os.path.join(config.test_imgs_dump_path,'/X_test.p')
-X_val = pickle.load(open(X_val_file,'rb'))
-
-Y_val_file = os.path.join(config.test_gt_dump_path,'/Y_test.p')
-Y_val = pickle.load(open(Y_val_file,'rb'))
+Y_test_file = os.path.join(BASE_DIR,'cache/test-set/Y_test.p')
+Y_val = pickle.load(open(Y_test_file,'rb'))
 
 # verify shape of sets
 print(X_train.shape)
