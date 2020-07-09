@@ -5,7 +5,6 @@ from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspo
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 from keras.models import Model
 from keras.optimizers import Adam
-from IPython import display
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
@@ -260,7 +259,7 @@ for i in range(Y_val.shape[0]):
     break
     
     time.sleep(1)
-    display.clear_output(wait=True)
+#     display.clear_output(wait=True)
 
 print('DONE')
 
