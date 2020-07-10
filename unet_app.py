@@ -1,7 +1,136 @@
 import os
+import keras
+from keras import backend as K
+from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, merge, UpSampling2D, Convolution2D
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-from cjfranzini_unet_model import get_unet,prediction_history, history_plot,generator
+from keras.models import Model
+from keras.optimizers import Adam
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import animation
+
+import time
 import pickle
+
+def scale_bands(img, lower_pct = 1, upper_pct = 99):
+    """Rescale the bands of a multichannel image for display"""
+    img_scaled = np.zeros(img.shape, np.uint8)
+    for i in range(img.shape[2]):
+        band = img[:, :, i]
+        lower, upper = np.percentile(band, [lower_pct, upper_pct])
+        band = (band - lower) / (upper - lower) * 255
+        img_scaled[:, :, i] = np.clip(band, 0, 255).astype(np.uint8)
+        
+    return img_scaled
+
+
+def jacc_coef(y_true, y_pred):
+    intersection = K.sum(y_true * y_pred, axis=[0, -1, -2])
+    sum_ = K.sum(y_true + y_pred, axis=[0, -1, -2])
+    jac = (intersection + smooth) / (sum_ - intersection + smooth)
+    
+    return K.mean(jac)
+
+
+def jacc_coef_loss(y_true, y_pred):
+    
+    return -jacc_coef(y_true, y_pred)
+
+
+def jacc_coef_int(y_true, y_pred):
+    y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    intersection = K.sum(y_true * y_pred_pos, axis=[0, -1, -2])
+    sum_ = K.sum(y_true + y_pred, axis=[0, -1, -2])
+    jac = (intersection + smooth) / (sum_ - intersection + smooth)
+    
+    return K.mean(jac)
+
+
+def get_unet(lr, INPUT_SIZE, N_CHANNEL,N_CLASSES):
+    inputs = Input((INPUT_SIZE, INPUT_SIZE, N_CHANNEL))
+    conv1 = Conv2D(32, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(inputs)
+    conv1 = Conv2D(32, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv1)
+    pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
+
+    conv2 = Conv2D(64, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(pool1)
+    conv2 = Conv2D(64, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv2)
+    pool2 = MaxPooling2D(pool_size=(2, 2))(conv2)
+
+    conv3 = Conv2D(128, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(pool2)
+    conv3 = Conv2D(128, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv3)
+    pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
+
+    conv4 = Conv2D(256, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(pool3)
+    conv4 = Conv2D(256, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv4)
+    pool4 = MaxPooling2D(pool_size=(2, 2))(conv4)
+
+    conv5 = Conv2D(512, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(pool4)
+    conv5 = Conv2D(512, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv5)
+
+    up6 = concatenate([Conv2DTranspose(256, (2, 2), strides=(2, 2), padding='same')(conv5), conv4], axis=3)
+    conv6 = Conv2D(256, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(up6)
+    conv6 = Conv2D(256, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv6)
+
+    up7 = concatenate([Conv2DTranspose(128, (2, 2), strides=(2, 2), padding='same')(conv6), conv3], axis=3)
+    conv7 = Conv2D(128, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(up7)
+    conv7 = Conv2D(128, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv7)
+
+    up8 = concatenate([Conv2DTranspose(64, (2, 2), strides=(2, 2), padding='same')(conv7), conv2], axis=3)
+    conv8 = Conv2D(64, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(up8)
+    conv8 = Conv2D(64, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv8)
+
+    up9 = concatenate([Conv2DTranspose(32, (2, 2), strides=(2, 2), padding='same')(conv8), conv1], axis=3)
+    conv9 = Conv2D(32, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(up9)
+    conv9 = Conv2D(32, (3, 3), activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
+
+    conv10 = Conv2D(N_CLASSES, (1, 1), activation='sigmoid')(conv9)
+
+    model = Model(inputs=[inputs], outputs=[conv10])
+
+    model.compile(optimizer=Adam(lr=lr), loss='binary_crossentropy', metrics=[jacc_coef])
+
+    return model
+
+
+def history_plot(fit):
+    plt.figure(figsize=(16,6))
+    plt.subplot(1,2,1)
+    plt.title('jaccard coef vs epoch')
+    plt.plot(fit.history['jacc_coef'], label='jacc_coef')
+    plt.plot(fit.history['val_jacc_coef'], label='val_jacc_coef')
+#     plt.grid()
+    plt.legend()
+
+    plt.subplot(1,2,2)
+    plt.title('cross entropy loss vs epoch')
+    plt.plot(fit.history['loss'], label='loss')
+    plt.plot(fit.history['val_loss'], label='val_loss')
+#     plt.grid()
+
+    plt.legend();
+    
+    
+class prediction_history(keras.callbacks.Callback):
+    def __init__(self):
+        self.predhis = []
+    def on_epoch_end(self, epoch, logs={}):
+        self.predhis.append(model.predict(X_val))
+        
+        
+def generator(x_train, y_train, batch_size):
+
+    # create empty arrays to contain batch of xs and ys
+    x_batch = np.zeros_like(x_train)
+    y_batch = np.zeros_like(y_train)
+
+    while True:
+        for i in range(batch_size):
+            # choose random index in features
+            index = np.random.choice(len(x_train),1)
+            x_batch = x_train[index]
+            y_batch = y_train[index]
+
+        yield x_batch, y_batch
 
 # set network size params
 N_CLASSES = 6 # farm, forest, grass, buildings, water,other
