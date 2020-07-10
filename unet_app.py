@@ -64,7 +64,7 @@ print(X_val.shape)
 print(Y_val.shape)
 
 # Train the model
-model = get_unet(lr,INPUT_SIZE, N_CHANNEL) #lr=0.001
+model = get_unet(lr,INPUT_SIZE, N_CHANNEL,N_CLASSES) #lr=0.001
 
 fit = model.fit_generator(generator(x_train=X_train, y_train=Y_train, batch_size=batch_size), 
                     steps_per_epoch=steps, 
