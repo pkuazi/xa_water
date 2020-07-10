@@ -195,7 +195,7 @@ print(Y_val.shape)
 # Train the model
 model = get_unet(lr,INPUT_SIZE, N_CHANNEL,N_CLASSES) #lr=0.001
 
-fit = model.fit(generator(x_train=X_train, y_train=Y_train, batch_size=batch_size), 
+fit = model.fit_generator(generator(x_train=X_train, y_train=Y_train, batch_size=batch_size), 
                     steps_per_epoch=steps, 
                     epochs=NUM_EPOCHS, 
                     callbacks=[model_checkpoint, reduce_lr, tensorboard, predictions],
