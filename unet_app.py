@@ -1,6 +1,6 @@
 import os
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-from cjfranzini_unet_model import get_unet,prediction_history, history_plot
+from cjfranzini_unet_model import get_unet,prediction_history, history_plot,generator
 import pickle
 
 # set network size params
