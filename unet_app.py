@@ -196,8 +196,8 @@ print(Y_val.shape)
 # Train the model
 model = get_unet(lr,INPUT_SIZE, N_CHANNEL,N_CLASSES) #lr=0.001
 
-# fit = model.fit(generator(x_train=X_train, y_train=Y_train, batch_size=batch_size), steps_per_epoch=steps, epochs=NUM_EPOCHS,  callbacks=[model_checkpoint, reduce_lr, tensorboard, predictions],validation_data=(X_val, Y_val))
-fit = model.fit(X_train, Y_train,epochs=NUM_EPOCHS,batch_size=batch_size,callbacks=[model_checkpoint, reduce_lr, tensorboard, predictions],validation_data=(X_val, Y_val))
+fit = model.fit(generator(x_train=X_train, y_train=Y_train, batch_size=batch_size), steps_per_epoch=steps, epochs=NUM_EPOCHS,  callbacks=[model_checkpoint, reduce_lr, tensorboard, predictions],validation_data=(X_val, Y_val))
+# fit = model.fit(X_train, Y_train,epochs=NUM_EPOCHS,batch_size=batch_size,callbacks=[model_checkpoint, reduce_lr, tensorboard, predictions],validation_data=(X_val, Y_val))
 # pickle model
 model.save('../pickle_jar/unet_XXIX_{:.3f}_{:.3f}'.format(fit.history['val_loss'][-1],
                                                         fit.history['val_jacc_coef'][-1]))
